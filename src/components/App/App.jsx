@@ -15,6 +15,18 @@ class App extends Component {
     filter: '',
   };
 
+  componentDidUpdate(prevState) {
+    if (this.state.contacts !== prevState.contacts) {
+      this.addToLocalStorage(this.state.contacts);
+    }
+  }
+
+  componentDidMount() {
+    this.loadFromLocalStorage();
+  }
+
+  localStorageKey = 'userContacts';
+
   formSubmitHandler = data => {
     if (this.state.contacts.find(contact => contact.name === data.name)) {
       return alert(`${data.name} is already in contacts`);
@@ -40,6 +52,27 @@ class App extends Component {
     this.setState(prevState => ({
       contacts: prevState.contacts.filter(item => item.id !== userId),
     }));
+  };
+
+  addToLocalStorage = data => {
+    try {
+      const serializedState = JSON.stringify(data);
+      localStorage.setItem(this.localStorageKey, serializedState);
+    } catch (error) {
+      console.error('Set state error: ', error.message);
+    }
+  };
+
+  loadFromLocalStorage = () => {
+    try {
+      const serializedState = localStorage.getItem(this.localStorageKey);
+
+      if (serializedState !== null) {
+        this.setState({ contacts: JSON.parse(serializedState) });
+      }
+    } catch (error) {
+      console.error('Get state error: ', error.message);
+    }
   };
 
   render() {
